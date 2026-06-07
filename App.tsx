@@ -192,13 +192,24 @@ const fuzzLocation = (coords: Coordinates): Coordinates => {
 
 const App: React.FC = () => {
   // Use sessionStorage so each TAB has a unique ID (allowing self-testing on same browser),
-  // but it survives page reloads (better UX).
+  // but also check localStorage for persistence in a native Capacitor/mobile context.
+  // Wrapped in try/catch to fully protect against strict WebView SecurityErrors.
   const [myId] = useState(() => {
-    const stored = sessionStorage.getItem('slidingchat_my_id');
-    if (stored) return stored;
-    const newId = 'user_' + Math.random().toString(36).substr(2, 9);
-    sessionStorage.setItem('slidingchat_my_id', newId);
-    return newId;
+    try {
+      const stored = sessionStorage.getItem('slidingchat_my_id') || localStorage.getItem('slidingchat_my_id');
+      if (stored) {
+        try { sessionStorage.setItem('slidingchat_my_id', stored); } catch (err) {}
+        try { localStorage.setItem('slidingchat_my_id', stored); } catch (err) {}
+        return stored;
+      }
+      const newId = 'user_' + Math.random().toString(36).substr(2, 9);
+      try { sessionStorage.setItem('slidingchat_my_id', newId); } catch (err) {}
+      try { localStorage.setItem('slidingchat_my_id', newId); } catch (err) {}
+      return newId;
+    } catch (e) {
+      console.warn("Storage APIs are blocked or restricted in this environment:", e);
+      return 'user_' + Math.random().toString(36).substr(2, 9);
+    }
   });
 
   const [settings, setSettings] = useState<UserSettings>({
@@ -520,7 +531,11 @@ const App: React.FC = () => {
     setActiveChatUser(null);
     setUnreadCounts({});
     // Clean peers on logout too
-    localStorage.removeItem('slidingchat_peers');
+    try {
+      localStorage.removeItem('slidingchat_peers');
+    } catch (e) {
+      console.warn("Storage APIs blocked on logout:", e);
+    }
   };
 
   const handleUserClick = (user: NearbyUser) => {
