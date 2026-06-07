@@ -13,12 +13,93 @@ interface ChatInterfaceProps {
 
 const TIMER_OPTIONS = [0, 5, 10, 30, 60]; // 0 = Off
 
+const CHAT_TRANSLATIONS: Record<string, any> = {
+  English: {
+    reportedEncounter: "Reported Encounter",
+    p2pEncrypted: "P2P Encrypted",
+    crossedPathsOn: "Crossed paths on",
+    typing: "typing...",
+    clearConfirm: "Delete all messages in this chat?"
+  },
+  Italian: {
+    reportedEncounter: "Incontro Segnalato",
+    p2pEncrypted: "Crittografia P2P",
+    crossedPathsOn: "Incrocio segnalato il",
+    typing: "sta scrivendo...",
+    clearConfirm: "Cancellare tutti i messaggi in questa chat?"
+  },
+  Spanish: {
+    reportedEncounter: "Encuentro Registrado",
+    p2pEncrypted: "Cifrado P2P",
+    crossedPathsOn: "Se cruzaron el",
+    typing: "escribiendo...",
+    clearConfirm: "¿Eliminar todos los mensajes de este chat?"
+  },
+  French: {
+    reportedEncounter: "Rencontre Signalée",
+    p2pEncrypted: "Chiffré P2P",
+    crossedPathsOn: "Croisé le",
+    typing: "écrit...",
+    clearConfirm: "Supprimer tous les messages de ce chat ?"
+  },
+  German: {
+    reportedEncounter: "Gemeldete Begegnung",
+    p2pEncrypted: "P2P-verschlüsselt",
+    crossedPathsOn: "Wege gekreuzt am",
+    typing: "schreibt...",
+    clearConfirm: "Alle Nachrichten in diesem Chat löschen?"
+  },
+  Portuguese: {
+    reportedEncounter: "Encontro Registrado",
+    p2pEncrypted: "Criptografado P2P",
+    crossedPathsOn: "Cruzaram-se em",
+    typing: "digitando...",
+    clearConfirm: "Excluir todas as mensagens deste chat?"
+  },
+  Chinese: {
+    reportedEncounter: "重合足迹",
+    p2pEncrypted: "P2P 端到端加密",
+    crossedPathsOn: "相遇时间：",
+    typing: "正在输入...",
+    clearConfirm: "删除此聊天的所有消息吗？"
+  },
+  Japanese: {
+    reportedEncounter: "すれ違いを検出",
+    p2pEncrypted: "P2P 暗号化接続",
+    crossedPathsOn: "すれ違い検出日時：",
+    typing: "入力中...",
+    clearConfirm: "このチャットのすべてのメッセージを削除しますか？"
+  },
+  Russian: {
+    reportedEncounter: "Зарегистрированная встреча",
+    p2pEncrypted: "P2P шифрование",
+    crossedPathsOn: "Пути пересеклись",
+    typing: "печатает...",
+    clearConfirm: "Удалить все сообщения в этом чате?"
+  },
+  Arabic: {
+    reportedEncounter: "لقاء مسجَّل",
+    p2pEncrypted: "تشفير P2P",
+    crossedPathsOn: "تقاطعت الطرق في",
+    typing: "يكتب الآن...",
+    clearConfirm: "هل تريد حذف جميع الرسائل في هذه الدردشة؟"
+  },
+  Hindi: {
+    reportedEncounter: "दर्ज की गई मुठभेड़",
+    p2pEncrypted: "P2P एन्क्रिप्टेड",
+    crossedPathsOn: "मुठभेड़ की तारीख",
+    typing: "टाइपिंग...",
+    clearConfirm: "क्या आप इस चैट के सभी संदेशों को हटाना चाहते हैं?"
+  }
+};
+
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   myId,
   recipient,
   userSettings,
   onClose,
 }) => {
+  const ct = CHAT_TRANSLATIONS[userSettings.language] || CHAT_TRANSLATIONS['English'];
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -56,7 +137,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   const clearChat = () => {
-    if (confirm("Delete all messages in this chat?")) {
+    if (confirm(ct.clearConfirm)) {
       try {
         localStorage.removeItem(chatId);
       } catch (e) {
@@ -496,12 +577,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </h3>
           <p className="text-xs text-turquoise-100 opacity-90 truncate">
             {isTyping
-              ? "typing..."
+              ? ct.typing
               : recipient.isRetroactive
-                ? userSettings.language === "Italian"
-                  ? "Incontro Segnalato"
-                  : "Reported Encounter"
-                : "P2P Encrypted"}
+                ? ct.reportedEncounter
+                : ct.p2pEncrypted}
           </p>
         </div>
 
@@ -545,9 +624,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               />
             </svg>
             <span>
-              {userSettings.language === "Italian"
-                ? `Incrocio segnalato il ${new Date(recipient.checkInTime).toLocaleString()}`
-                : `Crossed paths on ${new Date(recipient.checkInTime).toLocaleString()}`}
+              {`${ct.crossedPathsOn} ${new Date(recipient.checkInTime).toLocaleString()}`}
             </span>
           </div>
           {recipient.checkInCaption && (
@@ -576,9 +653,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               />
             </svg>
             <span>
-              {userSettings.language === "Italian"
-                ? `Incrocio segnalato il ${new Date(recipient.checkInTime).toLocaleString()}`
-                : `Crossed paths on ${new Date(recipient.checkInTime).toLocaleString()}`}
+              {`${ct.crossedPathsOn} ${new Date(recipient.checkInTime).toLocaleString()}`}
             </span>
           </div>
           {recipient.checkInCaption && (

@@ -48,7 +48,9 @@ const APP_TRANSLATIONS: Record<string, any> = {
     geoNotSupported: "Geolocation not supported.",
     youAreHere: "You are here (Approx)",
     map: "Map",
-    list: "List"
+    list: "List",
+    reportEncounter: "Report Encounter",
+    tapMapToPlace: "Tap the map to place your memory"
   },
   Italian: {
     online: "Online",
@@ -59,7 +61,9 @@ const APP_TRANSLATIONS: Record<string, any> = {
     geoNotSupported: "Geo non supportata.",
     youAreHere: "Sei qui (Approx)",
     map: "Mappa",
-    list: "Elenco"
+    list: "Elenco",
+    reportEncounter: "Segnala Incontro",
+    tapMapToPlace: "Tocca la mappa per posizionare il ricordo"
   },
   Spanish: {
     online: "En línea",
@@ -70,7 +74,9 @@ const APP_TRANSLATIONS: Record<string, any> = {
     geoNotSupported: "Geo no soportada.",
     youAreHere: "Estás aquí (Aprox)",
     map: "Mapa",
-    list: "Lista"
+    list: "Lista",
+    reportEncounter: "Registrar Encuentro",
+    tapMapToPlace: "Toca el mapa para colocar el recuerdo"
   },
   French: {
     online: "En ligne",
@@ -81,7 +87,9 @@ const APP_TRANSLATIONS: Record<string, any> = {
     geoNotSupported: "Non supportée.",
     youAreHere: "Vous êtes ici (Approx)",
     map: "Carte",
-    list: "Liste"
+    list: "Liste",
+    reportEncounter: "Signaler Rencontre",
+    tapMapToPlace: "Touchez la carte pour placer le souvenir"
   },
   German: {
     online: "Online",
@@ -92,7 +100,9 @@ const APP_TRANSLATIONS: Record<string, any> = {
     geoNotSupported: "Nicht unterstützt.",
     youAreHere: "Du bist hier (Ungefähr)",
     map: "Karte",
-    list: "Liste"
+    list: "Liste",
+    reportEncounter: "Begegnung melden",
+    tapMapToPlace: "Tippen Sie auf die Karte, um die Erinnerung zu platzieren"
   },
   Portuguese: {
     online: "Online",
@@ -103,7 +113,9 @@ const APP_TRANSLATIONS: Record<string, any> = {
     geoNotSupported: "Não suportada.",
     youAreHere: "Você está aqui (Aprox)",
     map: "Mapa",
-    list: "Lista"
+    list: "Lista",
+    reportEncounter: "Registrar Encontro",
+    tapMapToPlace: "Toque no mapa para posicionar a lembrança"
   },
   Chinese: {
     online: "在线",
@@ -114,7 +126,9 @@ const APP_TRANSLATIONS: Record<string, any> = {
     geoNotSupported: "不支持地理位置。",
     youAreHere: "您在这里（大约）",
     map: "地图",
-    list: "列表"
+    list: "列表",
+    reportEncounter: "标记相遇",
+    tapMapToPlace: "点击地图以标记您的足迹"
   },
   Japanese: {
     online: "オンライン",
@@ -125,7 +139,9 @@ const APP_TRANSLATIONS: Record<string, any> = {
     geoNotSupported: "位置情報はサポートされていません。",
     youAreHere: "現在地（概算）",
     map: "地図",
-    list: "リスト"
+    list: "リスト",
+    reportEncounter: "すれ違いを登録",
+    tapMapToPlace: "タップしてすれ違い場所を指定"
   },
   Russian: {
     online: "В сети",
@@ -136,7 +152,9 @@ const APP_TRANSLATIONS: Record<string, any> = {
     geoNotSupported: "Гео не поддерживается.",
     youAreHere: "Вы здесь (Прибл.)",
     map: "Карта",
-    list: "Список"
+    list: "Список",
+    reportEncounter: "Записать встречу",
+    tapMapToPlace: "Коснитесь карты, чтобы разместить воспоминание"
   },
   Arabic: {
     online: "متصل",
@@ -147,10 +165,12 @@ const APP_TRANSLATIONS: Record<string, any> = {
     geoNotSupported: "الموقع الجغرافي غير مدعوم.",
     youAreHere: "أنت هنا (تقريبي)",
     map: "خريطة",
-    list: "قائمة"
+    list: "قائمة",
+    reportEncounter: "تسجيل لقاء",
+    tapMapToPlace: "اضغط على الخريطة لتحديد مكان الذكرى"
   },
   Hindi: {
-    online: "ऑनलाइन",
+    online: "オンライン",
     offline: "ऑफ़लाइन",
     hint: "चैट के लिए हरे मार्कर पर टैप करें",
     loading: "स्थान प्राप्त कर रहा है...",
@@ -158,7 +178,9 @@ const APP_TRANSLATIONS: Record<string, any> = {
     geoNotSupported: "समर्थित नहीं है।",
     youAreHere: "आप यहाँ हैं (अनुमानित)",
     map: "मानचित्र",
-    list: "सूची"
+    list: "सूची",
+    reportEncounter: "मुठभेड़ दर्ज करें",
+    tapMapToPlace: "अपनी याद रखने के लिए मानचित्र पर टैप करें"
   }
 };
 
@@ -673,7 +695,7 @@ const App: React.FC = () => {
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <span className="text-xs font-bold hidden sm:inline">
-                        {settings.language === 'Italian' ? 'Segnala Incontro' : 'Report Encounter'}
+                        {t.reportEncounter}
                     </span>
                 </button>
             </div>
@@ -827,7 +849,7 @@ const App: React.FC = () => {
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-purple-600 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 animate-bounce">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             <span className="font-bold text-sm">
-                {settings.language === 'Italian' ? 'Tocca la mappa per posizionare il ricordo' : 'Tap the map to place your memory'}
+                {t.tapMapToPlace}
             </span>
             <button 
                 onClick={() => setPlacementMode(null)}
