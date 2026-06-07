@@ -38,6 +38,7 @@ jobs:
       - name: Compila APK (Gradle)
         run: |
           cd android
+          curl -sSLo gradle/wrapper/gradle-wrapper.jar https://raw.githubusercontent.com/gradle/gradle/v8.14.3/gradle/wrapper/gradle-wrapper.jar
           chmod +x gradlew
           ./gradlew assembleDebug
 
