@@ -3,12 +3,12 @@
   "name": "SlidingChat - P2P Messenger",
   "icons": [
     {
-      "src": "https://picsum.photos/seed/chat/192/192",
+      "src": "/logo.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "https://picsum.photos/seed/chat/512/512",
+      "src": "/logo.png",
       "type": "image/png",
       "sizes": "512x512"
     }
