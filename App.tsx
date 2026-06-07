@@ -12,6 +12,7 @@ import { translateText, transcribeAudio, generateBotReply } from './services/gem
 import { io, Socket } from 'socket.io-client';
 import { RetroactiveMenu } from './components/RetroactiveMenu';
 import { AdBanner } from './components/AdBanner';
+import { Geolocation } from '@capacitor/geolocation';
 
 // Color definitions for themes
 const THEME_COLORS: Record<string, Record<string, string>> = {
@@ -318,34 +319,70 @@ const App: React.FC = () => {
 
   // Initialize Geolocation
   useEffect(() => {
-    if (settings.setupComplete && !location) {
-      if ('geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const realCoords = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            };
-            const fuzzedCoords = fuzzLocation(realCoords);
-            setLocation(fuzzedCoords);
-            setCurrentScreen(AppScreen.MAP);
-            setNearbyUsers([]); 
-          },
-          (error) => {
-            console.error("Error getting location", error);
-            // Default Fallback (e.g., Rome) so app still works
-            const defaultLocation = { lat: 41.9028, lng: 12.4964 };
-            setLocation(fuzzLocation(defaultLocation));
-            setCurrentScreen(AppScreen.MAP);
-            // alert(t.geoError); // Don't block UI with alert
-          },
-          { enableHighAccuracy: true, timeout: 10000 }
-        );
-      } else {
-        alert(t.geoNotSupported);
+    const fetchLocation = async () => {
+      try {
+        console.log("Attempting Capacitor Geolocation...");
+        try {
+          const perm = await Geolocation.checkPermissions();
+          if (perm.location !== 'granted') {
+            await Geolocation.requestPermissions();
+          }
+        } catch (e) {
+          console.warn("Permission check/request failed, proceeding anyway", e);
+        }
+
+        const position = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 10000
+        });
+        
+        const realCoords = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        console.log("Capacitor location success:", realCoords);
+        const fuzzedCoords = fuzzLocation(realCoords);
+        setLocation(fuzzedCoords);
+        setCurrentScreen(AppScreen.MAP);
+        setNearbyUsers([]);
+      } catch (capError) {
+        console.warn("Capacitor GPS failed, trying standard navigator.geolocation...", capError);
+        
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const realCoords = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+              };
+              console.log("Standard location success:", realCoords);
+              const fuzzedCoords = fuzzLocation(realCoords);
+              setLocation(fuzzedCoords);
+              setCurrentScreen(AppScreen.MAP);
+              setNearbyUsers([]); 
+            },
+            (err) => {
+              console.error("Standard location failed too", err);
+              // Default Fallback (e.g., Rome) so app still works
+              const defaultLocation = { lat: 41.9028, lng: 12.4964 };
+              setLocation(fuzzLocation(defaultLocation));
+              setCurrentScreen(AppScreen.MAP);
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+          );
+        } else {
+          console.error("No geolocation API available");
+          const defaultLocation = { lat: 41.9028, lng: 12.4964 };
+          setLocation(fuzzLocation(defaultLocation));
+          setCurrentScreen(AppScreen.MAP);
+        }
       }
+    };
+
+    if (settings.setupComplete && !location) {
+      fetchLocation();
     }
-  }, [settings.setupComplete, t.geoError, t.geoNotSupported, location]);
+  }, [settings.setupComplete, location]);
 
   // Global P2P Message Listener
   useEffect(() => {
