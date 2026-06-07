@@ -20,10 +20,10 @@
      crossorigin=""/>
     <script>
       // Safeguard against tailwind CDN load failures
-      if (typeof tailwind === 'undefined') {
+      if (typeof window.tailwind === 'undefined') {
         window.tailwind = { config: {} };
       }
-      tailwind.config = {
+      window.tailwind.config = {
         theme: {
           extend: {
             colors: {

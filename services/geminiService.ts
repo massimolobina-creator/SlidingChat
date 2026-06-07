@@ -1,12 +1,33 @@
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+let aiInstance: any = null;
+
+const getAI = () => {
+  if (!aiInstance) {
+    try {
+      const apiKey = (typeof process !== 'undefined' && process.env && (process.env.API_KEY || process.env.GEMINI_API_KEY)) || '';
+      aiInstance = new GoogleGenAI({ apiKey: apiKey || 'DUMMY_KEY_FOR_INITIALIZATION' });
+    } catch (e) {
+      console.error("Failed to initialize GoogleGenAI:", e);
+      // Fallback safe object to prevent null pointer exceptions
+      aiInstance = {
+        models: {
+          generateContent: async () => {
+            throw new Error("AI Service is currently unavailable");
+          }
+        }
+      };
+    }
+  }
+  return aiInstance;
+};
 
 const MODEL_NAME = 'gemini-2.5-flash';
 
 // Simulates a translation service
 export const translateText = async (text: string, targetLanguage: string): Promise<string> => {
   try {
+    const ai = getAI();
     const response = await ai.models.generateContent({
       model: MODEL_NAME,
       contents: `Translate the following text to ${targetLanguage}. Return ONLY the translated text, no explanations. Text: "${text}"`,
@@ -21,6 +42,7 @@ export const translateText = async (text: string, targetLanguage: string): Promi
 // Transcribes audio to text for bot interaction
 export const transcribeAudio = async (audioDataUrl: string): Promise<string> => {
   try {
+    const ai = getAI();
     // Data URL format: data:audio/webm;base64,....
     const mimeType = audioDataUrl.split(';')[0].split(':')[1];
     const data = audioDataUrl.split(',')[1];
@@ -49,6 +71,7 @@ export const generateBotReply = async (
   userLanguage: string
 ): Promise<{ original: string; translated: string }> => {
   try {
+    const ai = getAI();
     const prompt = `
       You are roleplaying as a user named "${botName}" on a messaging app called SlidingChat. 
       Your native language is "${botLanguage}".
