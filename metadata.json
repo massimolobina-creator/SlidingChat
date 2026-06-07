@@ -1,0 +1,8 @@
+{
+  "name": "SlidingChat",
+  "description": "A hybrid messaging app combining features of WhatsApp and Telegram with real-time translation and geolocation-based discovery.",
+  "requestFramePermissions": [
+    "geolocation",
+    "microphone"
+  ]
+}
