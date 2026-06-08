@@ -316,17 +316,11 @@ const App: React.FC = () => {
   useEffect(() => {
     console.log("Connecting to socket...");
     
-    // Automatically detect correct socket server URL
+    // Ensure all users connect to the same central production backend so different environments (dev vs preview vs native) can see each other!
     let serverUrl = settings.serverUrl || import.meta.env.VITE_BACKEND_URL || '';
     if (!serverUrl) {
-      const origin = window.location.origin;
-      // In Capacitor or local files, origin might be localhost, capacitor://, or file://
-      if (!origin || origin.includes('localhost') || origin.startsWith('file:') || origin.startsWith('capacitor:')) {
-        // Fall back to the public deployment URL
-        serverUrl = 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
-      } else {
-         serverUrl = origin;
-      }
+      // Always fallback to the main shared deployment URL so dev (ais-dev) and preview/production (ais-pre) devices share the same active user memory!
+      serverUrl = 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
     }
     
     setDetectedSocketUrl(serverUrl);

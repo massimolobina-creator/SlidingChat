@@ -247,5 +247,55 @@ export const MapView: React.FC<MapViewProps> = ({
 
   }, [coords, nearbyUsers, isOnline, onUserClick, onRetroactiveClick, currentLocationLabel, unreadCounts, retroactiveCheckIns]);
 
-  return <div ref={containerRef} className="w-full h-full z-0" />;
+  return (
+    <div className="relative w-full h-full">
+      <div ref={containerRef} className="w-full h-full z-0" />
+      
+      {/* Map Action Buttons */}
+      <div className="absolute bottom-24 right-4 z-[400] flex flex-col gap-2">
+        <button
+          onClick={() => {
+            if (mapRef.current) {
+              mapRef.current.setView([coords.lat, coords.lng], 15);
+            }
+          }}
+          className="bg-white/95 text-gray-700 hover:bg-white shadow-lg p-3 rounded-full flex items-center justify-center border border-gray-100 active:scale-95 transition"
+          title={language === 'Italian' ? 'Centra su di me' : 'Recenter to my position'}
+        >
+          <svg className="w-5 h-5 text-turquoise-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+        
+        {nearbyUsers.length > 0 && (
+          <button
+            onClick={() => {
+              if (mapRef.current) {
+                const bounds = L.latLngBounds([coords.lat, coords.lng]);
+                nearbyUsers.forEach(u => {
+                  if (u.coords && u.status === 'online') {
+                    bounds.extend([u.coords.lat, u.coords.lng]);
+                  }
+                });
+                retroactiveCheckIns.forEach(c => {
+                  if (c.coords) {
+                    bounds.extend([c.coords.lat, c.coords.lng]);
+                  }
+                });
+                mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+              }
+            }}
+            className="bg-white/95 text-gray-700 hover:bg-white shadow-lg p-3 rounded-full flex items-center justify-center border border-gray-100 active:scale-95 transition"
+            title={language === 'Italian' ? 'Mostra tutti gli utenti' : 'Show all users'}
+          >
+            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+        )}
+      </div>
+    </div>
+  );
 };
