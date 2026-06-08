@@ -226,10 +226,13 @@ const App: React.FC = () => {
         return sessionStored;
       }
 
-      // Check if we are physically running in a standard web browser or in a native hybrid wrapper (Capacitor)
+      // Check if we are physically running in a standard desktop web browser or in a native hybrid/mobile wrapper
+      const isMobileDevice = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       const isWeb = typeof window !== 'undefined' && 
                     !window.hasOwnProperty('Capacitor') && 
+                    !(window as any).Capacitor &&
                     !navigator.userAgent.includes('Capacitor') &&
+                    !isMobileDevice &&
                     window.location.protocol.startsWith('http');
 
       if (isWeb) {
@@ -339,9 +342,35 @@ const App: React.FC = () => {
     // and fallback to PRE server only for local mock file schemas or native Capacitor apps
     let serverUrl = settings.serverUrl || import.meta.env.VITE_BACKEND_URL || '';
     if (!serverUrl) {
-      const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      if (origin && origin.startsWith('http')) {
-        serverUrl = origin;
+      if (typeof window !== 'undefined') {
+        const origin = window.location.origin || '';
+        const hostname = window.location.hostname || '';
+        const protocol = window.location.protocol || '';
+
+        // Differentiate local laptop Web development from phone webview / native compilation
+        const isNative = !!(window as any).Capacitor || 
+                         window.hasOwnProperty('Capacitor') || 
+                         navigator.userAgent.includes('Capacitor') ||
+                         protocol.startsWith('file') || 
+                         protocol.startsWith('capacitor') || 
+                         protocol.startsWith('ionic');
+
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isLocalLaptopDev = (hostname === 'localhost' || hostname === '127.0.0.1') && !isMobileDevice;
+
+        if (origin && origin.startsWith('http') && !isNative && !isMobileDevice && !isLocalLaptopDev) {
+          // Real web deployment running on Cloud Run (e.g. previewing inside editor or sharing link)
+          serverUrl = origin;
+          console.log("Auto-detected remote web-cluster connection:", serverUrl);
+        } else if (isLocalLaptopDev && !isNative) {
+          // Native local machine development in a desktop browser
+          serverUrl = `${window.location.protocol}//${window.location.hostname}:3000`;
+          console.log("Auto-detected local workstation development:", serverUrl);
+        } else {
+          // Native apps compiled for Android/iOS or mobile tests must connect to the centralized server!
+          serverUrl = 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
+          console.log("Auto-detected native/mobile wrapper, using central cloud relay:", serverUrl);
+        }
       } else {
         serverUrl = 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
       }
