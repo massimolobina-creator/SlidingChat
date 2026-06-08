@@ -710,28 +710,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpda
                     <summary className="flex items-center justify-between p-3 select-none cursor-pointer bg-gray-50/50 hover:bg-gray-100/50 transition font-semibold text-sm text-gray-700">
                         <div className="flex items-center gap-2">
                             <span className="text-xl">⚡</span>
-                            <span>{settings.language === 'Italian' ? 'Stato Online / Invisible (Radar)' : 'Online / Invisible Status (Radar)'}</span>
+                            <span>{t.helpRadarTitle}</span>
                         </div>
                         <svg className="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="19 9l-7 7-7-7"/></svg>
                     </summary>
                     <div className="p-3 bg-white text-xs text-gray-600 leading-relaxed space-y-2 border-t border-gray-100">
-                        {settings.language === 'Italian' ? (
-                            <>
-                                <p>Il pulsante rotondo con l'icona a forma di <strong>fulmine o segnale radar</strong> (in alto a destra sulla mappa) controlla la tua visibilità:</p>
-                                <ul className="list-disc pl-4 space-y-1">
-                                    <li><span className="text-green-500 font-bold">Verde (Online):</span> La tua posizione reale viene fusa (modificata di circa 200m per protezione privacy) e condivisa con gli utenti nelle vicinanze in tempo reale tramite la tecnologia d'incrocio P2P.</li>
-                                    <li><span className="text-gray-400 font-bold">Grigio/Rosso (Invisibile):</span> Ti disconnette dal network. Non carichi alcuna coordinata e non compari sulle mappe altrui. Puoi continuare a navigare ed esplorare l'app.</li>
-                                </ul>
-                            </>
-                        ) : (
-                            <>
-                                <p>The round floating toggle key containing the <strong>lightning or radar signal</strong> (located at map top-right) regulates your real-time presence:</p>
-                                <ul className="list-disc pl-4 space-y-1">
-                                    <li><span className="text-green-500 font-bold">Green (Online):</span> Your actual location is safely fuzzed (adjusted by ~200m to secure your security) and shared dynamically with close encounters.</li>
-                                    <li><span className="text-gray-400 font-bold">Gray/Red (Invisible):</span> Completely disconnects you. Your coordinate streams are halted and you vanish from maps, while remaining free to browse.</li>
-                                </ul>
-                            </>
-                        )}
+                        <p>{t.helpRadarIntro}</p>
+                        <ul className="list-disc pl-4 space-y-1">
+                            <li>{t.helpRadarBullet1}</li>
+                            <li>{t.helpRadarBullet2}</li>
+                        </ul>
                     </div>
                 </details>
 
@@ -740,28 +728,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpda
                     <summary className="flex items-center justify-between p-3 select-none cursor-pointer bg-gray-50/50 hover:bg-gray-100/50 transition font-semibold text-sm text-gray-700">
                         <div className="flex items-center gap-2">
                             <span className="text-xl">🗺️</span>
-                            <span>{settings.language === 'Italian' ? 'Mappa vs Elenco (Cambio Vista)' : 'Map vs List (Toggle View)'}</span>
+                            <span>{t.helpViewTitle}</span>
                         </div>
                         <svg className="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="19 9l-7 7-7-7"/></svg>
                     </summary>
                     <div className="p-3 bg-white text-xs text-gray-600 leading-relaxed space-y-2 border-t border-gray-100">
-                        {settings.language === 'Italian' ? (
-                            <>
-                                <p>Puoi alternare l'interfaccia principale usando la pulsantiera centrale a destra:</p>
-                                <ul className="list-disc pl-4 space-y-1">
-                                    <li><strong>Icona Globo (Mappa):</strong> Visualizzazione spaziale dei tuoi incroci e ricordi geografici. Puoi toccare ogni segnaposto verde per vedere dettagli, messaggi non letti ed avviare la chat.</li>
-                                    <li><strong>Icona Elenco (Lista):</strong> Mostra le persone incrociate o i ricordi registrati ordinati cronologicamente, con distanze approssimative, foto e l'indicatore di messaggi non letti.</li>
-                                </ul>
-                            </>
-                        ) : (
-                            <>
-                                <p>You can seamlessly swap the layout view using the central control pill on the right:</p>
-                                <ul className="list-disc pl-4 space-y-1">
-                                    <li><strong>Globe Icon (Map View):</strong> Visualizes a spatial interactive map of encounters. Colored markers indicate localized matches and retroactive memory points.</li>
-                                    <li><strong>List Icon (List View):</strong> Displays an ordered chronological history summary of nearby fellows, complete with details and conversation alerts.</li>
-                                </ul>
-                            </>
-                        )}
+                        <p>{t.helpViewIntro}</p>
+                        <ul className="list-disc pl-4 space-y-1">
+                            <li>{t.helpViewBullet1}</li>
+                            <li>{t.helpViewBullet2}</li>
+                        </ul>
                     </div>
                 </details>
 
@@ -770,32 +746,19 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpda
                     <summary className="flex items-center justify-between p-3 select-none cursor-pointer bg-gray-50/50 hover:bg-gray-100/50 transition font-semibold text-sm text-gray-700">
                         <div className="flex items-center gap-2">
                             <span className="text-xl">📅</span>
-                            <span>{settings.language === 'Italian' ? 'Geolocalizzazione Retroattiva' : 'Retroactive Geolocation'}</span>
+                            <span>{t.helpRetroTitle}</span>
                         </div>
                         <svg className="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="19 9l-7 7-7-7"/></svg>
                     </summary>
                     <div className="p-3 bg-white text-xs text-gray-600 leading-relaxed space-y-2 border-t border-gray-100">
-                        {settings.language === 'Italian' ? (
-                            <>
-                                <p><strong>Ti sei incrociato con qualcuno in passato ma l'app era spenta?</strong> Questa funzionalità ti consente di registrarlo manualmente!</p>
-                                <ul className="list-disc pl-4 space-y-1">
-                                    <li>Clicca sul pulsante della <strong>Geolocalizzazione Retroattiva</strong> (icona calendario) nel menu o mappa per configurare data, ora precisa e una didascalia (es. "Ci siamo guardati all'incrocio, maglietta verde").</li>
-                                    <li>Trascina liberamente il segnaposto sulla micro-mappa per scegliere il punto esatto in cui ricordare l'evento.</li>
-                                    <li>In alternativa, premi <strong>"Posiziona sulla Mappa Principale"</strong>: lo schermo si illuminerà e potrai toccare un punto qualunque della mappa grande per posizionare il tuo ricordo con precisione chirurgica!</li>
-                                    <li>Se qualcun altro registra un incrocio retroattivo negli stessi orari e zone, l'app vi collegherà automaticamente in chat!</li>
-                                </ul>
-                            </>
-                        ) : (
-                            <>
-                                <p><strong>Crossed paths with someone in the past while the app was inactive?</strong> This custom feature lets you manually record retro matches!</p>
-                                <ul className="list-disc pl-4 space-y-1">
-                                    <li>Press the <strong>Retroactive Geolocation</strong> calendar trigger key. Choose precise Date, Time, and description (e.g. "We smiled near the bookshop, wearing yellow beanie").</li>
-                                    <li>Drag the marker pin inside the dialog frame to localized coordinate points.</li>
-                                    <li>Or, select <strong>"Place on Main Map"</strong>: the panel dims, allowing you to click or tap literally anywhere on the primary layout to position the memory pins.</li>
-                                    <li>If another fellow logs matching dates/spots, the platform connects your timelines instantly.</li>
-                                </ul>
-                            </>
-                        )}
+                        <p>{t.helpRetroIntro}</p>
+                        <ul className="list-disc pl-4 space-y-1">
+                            <li>{t.helpRetroBullet1}</li>
+                            <li>{t.helpRetroBullet2}</li>
+                            <li>{t.helpRetroBullet3}</li>
+                            <li>{t.helpRetroBullet4}</li>
+                            <li>{t.helpRetroBullet5}</li>
+                        </ul>
                     </div>
                 </details>
 
@@ -804,32 +767,18 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpda
                     <summary className="flex items-center justify-between p-3 select-none cursor-pointer bg-gray-50/50 hover:bg-gray-100/50 transition font-semibold text-sm text-gray-700">
                         <div className="flex items-center gap-2">
                             <span className="text-xl">💬</span>
-                            <span>{settings.language === 'Italian' ? 'Funzioni Chat e AI Gemini' : 'Chat & Gemini AI Features'}</span>
+                            <span>{t.helpChatTitle}</span>
                         </div>
                         <svg className="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="19 9l-7 7-7-7"/></svg>
                     </summary>
                     <div className="p-3 bg-white text-xs text-gray-600 leading-relaxed space-y-2 border-t border-gray-100">
-                        {settings.language === 'Italian' ? (
-                            <>
-                                <p>SlidingChat integra sistemi intelligenti di interazione diretta:</p>
-                                <ul className="list-disc pl-4 space-y-1">
-                                    <li><strong>Traduzione automatica (Gemini):</strong> I messaggi inviati in lingue straniere ti verranno mostrati direttamente tradotti in italiano.</li>
-                                    <li><strong>Audio Messaggi & Trascrizione:</strong> Registra e invia messaggi vocali cliccando sul microfono. L'AI trascriverà il testo sul display automaticamente.</li>
-                                    <li><strong>Autodistruzione (Icona Timer):</strong> Scegli un limite temporale (5s, 10s...) per far sì che il tuo messaggio svanisca una volta visualizzato dall'interlocutore.</li>
-                                    <li><strong>Ricevute di Lettura:</strong> Le iconiche doppie spunte blu indicano se il tuo messaggio è stato visualizzato offline, online o in tempo reale.</li>
-                                </ul>
-                            </>
-                        ) : (
-                            <>
-                                <p>SlidingChat hosts beautiful real-time peer communication mechanisms:</p>
-                                <ul className="list-disc pl-4 space-y-1">
-                                    <li><strong>Auto-Translation (Gemini):</strong> Chat text in external foreign languages translates automatically into your default selected language!</li>
-                                    <li><strong>Audio Notes & Transcription:</strong> Send voice records by holding the microphone key; speech transcription displays text dynamically.</li>
-                                    <li><strong>Ephemeral Timer (Stopwatch icon):</strong> Set self-destruct timers on media or texts to vanish right after being seen.</li>
-                                    <li><strong>Read Receipts:</strong> Standardized double indicator checkmarks highlight delivery status and reading actions.</li>
-                                </ul>
-                            </>
-                        )}
+                        <p>{t.helpChatIntro}</p>
+                        <ul className="list-disc pl-4 space-y-1">
+                            <li>{t.helpChatBullet1}</li>
+                            <li>{t.helpChatBullet2}</li>
+                            <li>{t.helpChatBullet3}</li>
+                            <li>{t.helpChatBullet4}</li>
+                        </ul>
                     </div>
                 </details>
             </div>

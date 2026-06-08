@@ -278,7 +278,21 @@ export const RetroactiveMenu: React.FC<RetroactiveMenuProps> = ({
   };
 
   const handleDelete = () => {
-    if (editingCheckIn && onDelete && confirm(language === 'Italian' ? 'Rimuovere questo ricordo?' : 'Remove this memory?')) {
+    const confirmTexts: Record<string, string> = {
+      English: "Remove this memory?",
+      Italian: "Rimuovere questo ricordo?",
+      Spanish: "¿Eliminar este recuerdo?",
+      French: "Supprimer ce souvenir ?",
+      German: "Diese Erinnerung löschen?",
+      Portuguese: "Remover esta lembrança?",
+      Chinese: "确认删除此足迹吗？",
+      Japanese: "このすれ違い登録を削除しますか？",
+      Russian: "Удалить это воспоминание?",
+      Arabic: "هل تريد حذف هذه الذكرى؟",
+      Hindi: "क्या आप इस याद को हटाना चाहते हैं?"
+    };
+    const confirmMsg = confirmTexts[language] || confirmTexts['English'];
+    if (editingCheckIn && onDelete && confirm(confirmMsg)) {
       onDelete(editingCheckIn.id);
     }
   };

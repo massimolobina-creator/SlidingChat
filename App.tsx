@@ -749,6 +749,7 @@ const App: React.FC = () => {
                         currentLocationLabel={t.youAreHere}
                         unreadCounts={unreadCounts}
                         retroactiveCheckIns={retroactiveCheckIns}
+                        language={settings.language}
                         onMapClick={(coords) => {
                             if (placementMode?.active) {
                                 handleAddRetroactive(coords, placementMode.timestamp, placementMode.caption);

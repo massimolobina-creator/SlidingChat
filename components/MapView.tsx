@@ -13,10 +13,25 @@ interface MapViewProps {
   currentLocationLabel: string;
   unreadCounts: Record<string, number>;
   retroactiveCheckIns?: import('../types').RetroactiveCheckIn[];
+  language?: string;
 }
 
+const LOCALIZED_MAP: Record<string, { openChat: string; details: string }> = {
+  English: { openChat: 'Open Chat', details: 'Details' },
+  Italian: { openChat: 'Apri Chat', details: 'Dettagli' },
+  Spanish: { openChat: 'Abrir Chat', details: 'Detalles' },
+  French: { openChat: 'Ouvrir le chat', details: 'Détails' },
+  German: { openChat: 'Chat öffnen', details: 'Details' },
+  Portuguese: { openChat: 'Abrir chat', details: 'Detalhes' },
+  Chinese: { openChat: '打开聊天', details: '详情' },
+  Japanese: { openChat: 'チャットを開く', details: '詳細' },
+  Russian: { openChat: 'Открыть чат', details: 'Детали' },
+  Arabic: { openChat: 'افتح الدردشة', details: 'التفاصيل' },
+  Hindi: { openChat: 'चैट खोलें', details: 'विवरण' }
+};
+
 export const MapView: React.FC<MapViewProps> = ({ 
-    coords, nearbyUsers, onUserClick, onRetroactiveClick, onMapClick, isOnline, currentLocationLabel, unreadCounts, retroactiveCheckIns = [] 
+    coords, nearbyUsers, onUserClick, onRetroactiveClick, onMapClick, isOnline, currentLocationLabel, unreadCounts, retroactiveCheckIns = [], language = 'English' 
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -182,6 +197,7 @@ export const MapView: React.FC<MapViewProps> = ({
                         zIndexOffset: 500
                     }).addTo(mapRef.current!);
 
+                    const tPopup = LOCALIZED_MAP[language] || LOCALIZED_MAP['English'];
                     const captionHTML = checkIn.caption ? `<div class="mt-1 text-purple-600 italic border-t border-purple-100 pt-1">"${checkIn.caption}"</div>` : '';
                     const popupContent = `
                         <div class="p-1 min-w-[120px]">
@@ -189,7 +205,7 @@ export const MapView: React.FC<MapViewProps> = ({
                             <div class="text-[10px] text-gray-500">${dateStr}</div>
                             ${captionHTML}
                             <button id="chat-btn-${checkIn.id}" class="mt-2 w-full bg-purple-600 text-white text-[10px] font-bold py-1 px-2 rounded hover:bg-purple-700 transition">
-                                ${isOnline ? (checkIn.language === 'Italian' ? 'Apri Chat' : 'Open Chat') : (checkIn.language === 'Italian' ? 'Dettagli' : 'Details')}
+                                ${isOnline ? tPopup.openChat : tPopup.details}
                             </button>
                         </div>
                     `;
