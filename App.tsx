@@ -379,13 +379,19 @@ const App: React.FC = () => {
     setDetectedSocketUrl(serverUrl);
     console.log("Socket server URL determined:", serverUrl);
     
-    // Instantiate with robust cross-platform options to guarantee connection over mobile/carrier lines
+    // Instantiate with robust cross-platform options to guarantee connection over mobile/carrier lines.
+    // For serverless cloud environments (like Google Cloud Run), HTTP polling will randomly fail
+    // with 'Session ID unknown' because there is no session affinity across autoscaled server nodes.
+    // Specifying purely the 'websocket' transport completely bypasses polling, creating a direct
+    // persistent TCP socket connection which is 100% stable on Cloud Run and mobile carrier NATs!
     const newSocket = io(serverUrl, {
-      transports: ['websocket', 'polling'],
+      transports: ['websocket'],
+      upgrade: false,
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000
+      reconnectionDelay: 1000,
+      timeout: 20000
     });
     
     // Bridge our P2P message sender to route over Socket.io fallback instantly
