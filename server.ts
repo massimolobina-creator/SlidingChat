@@ -5,12 +5,28 @@ import { Server } from "socket.io";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
+  
+  // Clear any existing debug log at start
+  try {
+    fs.writeFileSync(path.join(process.cwd(), "server.log"), `--- Server Started at ${new Date().toISOString()} ---\n`);
+  } catch (err) {}
+
+  // Logging middleware to trace all HTTP requests
+  app.use((req, res, next) => {
+    try {
+      const logMsg = `[HTTP FETCH] ${new Date().toISOString()} - ${req.method} ${req.url} - IP: ${req.ip} - User-Agent: ${req.headers["user-agent"]}\n`;
+      fs.appendFileSync(path.join(process.cwd(), "server.log"), logMsg);
+    } catch (err) {}
+    next();
+  });
+
   const httpServer = createServer(app);
   const io = new Server(httpServer, {
     cors: {
@@ -28,6 +44,10 @@ async function startServer() {
 
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
+    try {
+      const logLine = `[SOCKET CONNECT] ${new Date().toISOString()} - ID: ${socket.id} - Transport: ${socket.conn.transport.name} - Headers: ${JSON.stringify(socket.handshake.headers)}\n`;
+      fs.appendFileSync(path.join(process.cwd(), "server.log"), logLine);
+    } catch (err) {}
 
     // Send existing retroactive check-ins to the new user
     socket.emit("retroactive_list", retroactiveCheckIns);

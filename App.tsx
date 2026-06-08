@@ -308,6 +308,7 @@ const App: React.FC = () => {
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [socket, setSocket] = useState<Socket | null>(null);
   const [socketConnected, setSocketConnected] = useState(false);
+  const [socketError, setSocketError] = useState<string | null>(null);
   const [detectedSocketUrl, setDetectedSocketUrl] = useState('');
   const [retroactiveCheckIns, setRetroactiveCheckIns] = useState<RetroactiveCheckIn[]>([]);
   const [showRetroactiveMenu, setShowRetroactiveMenu] = useState(false);
@@ -382,8 +383,8 @@ const App: React.FC = () => {
     // Specifying purely the 'websocket' transport completely bypasses polling, creating a direct
     // persistent TCP socket connection which is 100% stable on Cloud Run and mobile carrier NATs!
     const newSocket = io(serverUrl, {
-      transports: ['websocket'],
-      upgrade: false,
+      transports: ['polling', 'websocket'],
+      upgrade: true,
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: Infinity,
@@ -405,6 +406,7 @@ const App: React.FC = () => {
     newSocket.on("connect", () => {
       console.log("Socket connected:", newSocket.id);
       setSocketConnected(true);
+      setSocketError(null);
       // Request initial data
       newSocket.emit("request_retroactive_list");
     });
@@ -415,6 +417,7 @@ const App: React.FC = () => {
 
     newSocket.on("connect_error", (err) => {
       console.error("Socket connection error:", err);
+      setSocketError(err.message || String(err));
       setSocketConnected(false);
     });
 
@@ -949,6 +952,7 @@ const App: React.FC = () => {
             onLogout={handleLogout}
             socketConnected={socketConnected}
             detectedSocketUrl={detectedSocketUrl}
+            socketError={socketError}
         />
       )}
 

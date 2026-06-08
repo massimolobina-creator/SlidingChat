@@ -10,6 +10,7 @@ interface SettingsScreenProps {
   onLogout: () => void;
   socketConnected?: boolean;
   detectedSocketUrl?: string;
+  socketError?: string | null;
 }
 
 const LANGUAGES = [
@@ -604,7 +605,7 @@ const TEXTS: Record<string, any> = {
     connect: "Подключить"
   }
 };
-export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpdate, onClose, onLogout, socketConnected, detectedSocketUrl }) => {
+export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpdate, onClose, onLogout, socketConnected, detectedSocketUrl, socketError = null }) => {
   const [nickname, setNickname] = useState(settings.nickname);
   const [connectId, setConnectId] = useState('');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -704,6 +705,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpda
                                  <>
                                      <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
                                      <span className="text-red-500 font-semibold text-xs">{t.statusDisconnected || "Disconnected"}</span>
+                                     {socketError && (
+                                         <span className="block text-[9px] font-mono font-medium text-red-400 mt-0.5 break-all leading-tight max-w-[150px]">
+                                             Err: {socketError}
+                                         </span>
+                                     )}
                                  </>
                              )
                          ) : (
