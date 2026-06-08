@@ -344,10 +344,9 @@ const App: React.FC = () => {
     if (!serverUrl) {
       if (typeof window !== 'undefined') {
         const origin = window.location.origin || '';
-        const hostname = window.location.hostname || '';
         const protocol = window.location.protocol || '';
 
-        // Differentiate local laptop Web development from phone webview / native compilation
+        // Differentiate standard web browsers from compiled native apps (Capacitor/Cordova)
         const isNative = !!(window as any).Capacitor || 
                          window.hasOwnProperty('Capacitor') || 
                          navigator.userAgent.includes('Capacitor') ||
@@ -355,21 +354,14 @@ const App: React.FC = () => {
                          protocol.startsWith('capacitor') || 
                          protocol.startsWith('ionic');
 
-        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        const isLocalLaptopDev = (hostname === 'localhost' || hostname === '127.0.0.1') && !isMobileDevice;
-
-        if (origin && origin.startsWith('http') && !isNative && !isMobileDevice && !isLocalLaptopDev) {
-          // Real web deployment running on Cloud Run (e.g. previewing inside editor or sharing link)
+        if (origin && origin.startsWith('http') && !isNative) {
+          // Desktop and mobile web browsers (local server, Dev App, or Shared App Deployment)
           serverUrl = origin;
-          console.log("Auto-detected remote web-cluster connection:", serverUrl);
-        } else if (isLocalLaptopDev && !isNative) {
-          // Native local machine development in a desktop browser
-          serverUrl = `${window.location.protocol}//${window.location.hostname}:3000`;
-          console.log("Auto-detected local workstation development:", serverUrl);
+          console.log("Auto-detected web connection (using page origin):", serverUrl);
         } else {
-          // Native apps compiled for Android/iOS or mobile tests must connect to the centralized server!
+          // Compiled native mobile apps must connect to the centralized production/shared server relay
           serverUrl = 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
-          console.log("Auto-detected native/mobile wrapper, using central cloud relay:", serverUrl);
+          console.log("Auto-detected native framework runtime, using cloud relay fallback:", serverUrl);
         }
       } else {
         serverUrl = 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
