@@ -220,16 +220,35 @@ const App: React.FC = () => {
   // Wrapped in try/catch to fully protect against strict WebView SecurityErrors.
   const [myId] = useState(() => {
     try {
-      const stored = sessionStorage.getItem('slidingchat_my_id') || localStorage.getItem('slidingchat_my_id');
-      if (stored) {
-        try { sessionStorage.setItem('slidingchat_my_id', stored); } catch (err) {}
-        try { localStorage.setItem('slidingchat_my_id', stored); } catch (err) {}
-        return stored;
+      // Direct session privilege for testing multiple tabs on the same browser/device
+      const sessionStored = sessionStorage.getItem('slidingchat_my_id');
+      if (sessionStored) {
+        return sessionStored;
       }
-      const newId = 'user_' + Math.random().toString(36).substr(2, 9);
-      try { sessionStorage.setItem('slidingchat_my_id', newId); } catch (err) {}
-      try { localStorage.setItem('slidingchat_my_id', newId); } catch (err) {}
-      return newId;
+
+      // Check if we are physically running in a standard web browser or in a native hybrid wrapper (Capacitor)
+      const isWeb = typeof window !== 'undefined' && 
+                    !window.hasOwnProperty('Capacitor') && 
+                    !navigator.userAgent.includes('Capacitor') &&
+                    window.location.protocol.startsWith('http');
+
+      if (isWeb) {
+        // Generates unique IDs per browser tab so that testing of two tabs on the same environment is instant and painless!
+        const newId = 'user_' + Math.random().toString(36).substr(2, 9);
+        try { sessionStorage.setItem('slidingchat_my_id', newId); } catch (err) {}
+        return newId;
+      } else {
+        // App/Capacitor context where persistence across launches is key
+        const stored = localStorage.getItem('slidingchat_my_id');
+        if (stored) {
+          try { sessionStorage.setItem('slidingchat_my_id', stored); } catch (err) {}
+          return stored;
+        }
+        const newId = 'user_' + Math.random().toString(36).substr(2, 9);
+        try { sessionStorage.setItem('slidingchat_my_id', newId); } catch (err) {}
+        try { localStorage.setItem('slidingchat_my_id', newId); } catch (err) {}
+        return newId;
+      }
     } catch (e) {
       console.warn("Storage APIs are blocked or restricted in this environment:", e);
       return 'user_' + Math.random().toString(36).substr(2, 9);
@@ -316,11 +335,16 @@ const App: React.FC = () => {
   useEffect(() => {
     console.log("Connecting to socket...");
     
-    // Ensure all users connect to the same central production backend so different environments (dev vs preview vs native) can see each other!
+    // Connect to current origin's socket backend if it's a real web deployment (dev, prod/pre),
+    // and fallback to PRE server only for local mock file schemas or native Capacitor apps
     let serverUrl = settings.serverUrl || import.meta.env.VITE_BACKEND_URL || '';
     if (!serverUrl) {
-      // Always fallback to the main shared deployment URL so dev (ais-dev) and preview/production (ais-pre) devices share the same active user memory!
-      serverUrl = 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      if (origin && origin.startsWith('http')) {
+        serverUrl = origin;
+      } else {
+        serverUrl = 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
+      }
     }
     
     setDetectedSocketUrl(serverUrl);
@@ -589,6 +613,16 @@ const App: React.FC = () => {
         socket.off("connect", sendLocationUpdate);
     };
   }, [settings.setupComplete, settings.isOnline, location, settings.nickname, settings.language, myId, settings.peerId, socket]);
+
+  // Instant online/offline transition sync to avoid stale locations on other maps
+  useEffect(() => {
+    if (!socket || !settings.setupComplete) return;
+
+    socket.emit("update_status", {
+      id: myId,
+      status: settings.isOnline ? 'online' : 'offline'
+    });
+  }, [settings.isOnline, socket, settings.setupComplete, myId]);
 
   // Simulates Bot Interaction
   const generateFakeUsers = () => {
