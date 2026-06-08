@@ -252,7 +252,7 @@ export const MapView: React.FC<MapViewProps> = ({
       <div ref={containerRef} className="w-full h-full z-0" />
       
       {/* Map Action Buttons */}
-      <div className="absolute bottom-24 right-4 z-[400] flex flex-col gap-2">
+      <div className="absolute bottom-24 right-4 z-[1000] flex flex-col gap-2">
         <button
           onClick={() => {
             if (mapRef.current) {

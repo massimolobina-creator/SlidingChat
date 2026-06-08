@@ -635,7 +635,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpda
   };
 
   return (
-    <div className="absolute inset-0 z-50 bg-gray-100 flex flex-col animate-slideUp">
+    <div className="absolute inset-0 z-[1550] bg-gray-100 flex flex-col animate-slideUp">
       {/* Header */}
       <div className="bg-white px-4 py-4 shadow-sm flex items-center justify-between sticky top-0 z-10">
         <h2 className="text-xl font-bold text-gray-800">{t.title}</h2>

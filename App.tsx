@@ -244,7 +244,7 @@ const App: React.FC = () => {
         return {
           nickname: '',
           language: 'English',
-          isOnline: false,
+          isOnline: true,
           setupComplete: false,
           theme: 'turquoise',
           notificationsEnabled: true,
@@ -258,7 +258,7 @@ const App: React.FC = () => {
     return {
       nickname: '',
       language: 'English',
-      isOnline: false,
+      isOnline: true,
       setupComplete: false,
       theme: 'turquoise',
       notificationsEnabled: true,
@@ -745,7 +745,7 @@ const App: React.FC = () => {
       <div className={`flex-1 relative transition-transform duration-300 ${currentScreen === AppScreen.CHAT ? 'translate-x-[-20%] opacity-50 pointer-events-none' : 'translate-x-0'}`}>
         
         {/* Floating Header */}
-        <div className="absolute top-0 left-0 right-0 z-20 p-4 bg-gradient-to-b from-black/20 to-transparent pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 z-[1010] p-4 bg-gradient-to-b from-black/20 to-transparent pointer-events-none">
           <div className="flex justify-between items-center pointer-events-auto gap-2">
             
             {/* Left: Avatar & Settings */}
@@ -866,7 +866,7 @@ const App: React.FC = () => {
         
         {/* Helper Badge (Only on map) */}
         {viewMode === 'MAP' && nearbyUsers.length > 0 && (
-          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20 pointer-events-none">
+          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-[1010] pointer-events-none">
              <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-xl text-xs text-gray-600 font-medium border border-white">
                 {t.hint}
              </div>
@@ -887,7 +887,7 @@ const App: React.FC = () => {
       )}
 
       {/* Chat Overlay / Slide-in */}
-      <div className={`absolute inset-0 bg-white z-30 transition-transform duration-300 ease-in-out ${currentScreen === AppScreen.CHAT ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`absolute inset-0 bg-white z-[1200] transition-transform duration-300 ease-in-out ${currentScreen === AppScreen.CHAT ? 'translate-x-0' : 'translate-x-full'}`}>
         {activeChatUser && (
           <ChatInterface 
             myId={myId}
@@ -924,7 +924,7 @@ const App: React.FC = () => {
 
       {/* Placement Mode Banner */}
       {placementMode?.active && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-purple-600 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 animate-bounce">
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[1200] bg-purple-600 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 animate-bounce">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
             <span className="font-bold text-sm">
                 {t.tapMapToPlace}

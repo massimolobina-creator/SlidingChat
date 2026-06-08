@@ -50,6 +50,20 @@ async function startServer() {
       io.emit("users_update", Array.from(users.values()));
     });
 
+    socket.on("update_status", ({ id, status }) => {
+      console.log(`User ${id} status updated to: ${status}`);
+      if (status === 'offline') {
+        users.delete(id);
+      } else {
+        const user = users.get(id);
+        if (user) {
+          user.status = status;
+          user.lastSeen = Date.now();
+        }
+      }
+      io.emit("users_update", Array.from(users.values()));
+    });
+
     socket.on("send_message", ({ recipientId, message }) => {
       console.log(`Routing message from ${message.senderId} to ${recipientId} via Socket.IO proxy`);
       const recipientUser = users.get(recipientId);
