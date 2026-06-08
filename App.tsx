@@ -236,30 +236,72 @@ const App: React.FC = () => {
     }
   });
 
-  const [settings, setSettings] = useState<UserSettings>({
-    nickname: '',
-    language: 'English',
-    isOnline: false,
-    setupComplete: false,
-    theme: 'turquoise',
-    notificationsEnabled: true,
-    blockedUsers: [],
-    peerId: undefined
+  const [settings, setSettings] = useState<UserSettings>(() => {
+    try {
+      const stored = localStorage.getItem('slidingchat_settings');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return {
+          nickname: '',
+          language: 'English',
+          isOnline: false,
+          setupComplete: false,
+          theme: 'turquoise',
+          notificationsEnabled: true,
+          blockedUsers: [],
+          ...parsed
+        };
+      }
+    } catch (e) {
+      console.warn("Storage APIs are blocked or restricted in this environment:", e);
+    }
+    return {
+      nickname: '',
+      language: 'English',
+      isOnline: false,
+      setupComplete: false,
+      theme: 'turquoise',
+      notificationsEnabled: true,
+      blockedUsers: [],
+      peerId: undefined
+    };
   });
 
   const [location, setLocation] = useState<Coordinates | null>(null);
   const [nearbyUsers, setNearbyUsers] = useState<NearbyUser[]>([]);
-  const [currentScreen, setCurrentScreen] = useState<AppScreen>(AppScreen.INTRO);
+  const [currentScreen, setCurrentScreen] = useState<AppScreen>(() => {
+    try {
+      const stored = localStorage.getItem('slidingchat_settings');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.setupComplete) {
+          return AppScreen.MAP;
+        }
+      }
+    } catch (e) {}
+    return AppScreen.INTRO;
+  });
   const [viewMode, setViewMode] = useState<ViewMode>('MAP');
   const [activeChatUser, setActiveChatUser] = useState<NearbyUser | null>(null);
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [socket, setSocket] = useState<Socket | null>(null);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [detectedSocketUrl, setDetectedSocketUrl] = useState('');
   const [retroactiveCheckIns, setRetroactiveCheckIns] = useState<RetroactiveCheckIn[]>([]);
   const [showRetroactiveMenu, setShowRetroactiveMenu] = useState(false);
   const [editingCheckIn, setEditingCheckIn] = useState<RetroactiveCheckIn | null>(null);
   const [placementMode, setPlacementMode] = useState<{ active: boolean; timestamp: number; caption?: string } | null>(null);
 
   const t = APP_TRANSLATIONS[settings.language] || APP_TRANSLATIONS['English'];
+
+  // Persist settings
+  useEffect(() => {
+    try {
+      localStorage.setItem('slidingchat_settings', JSON.stringify(settings));
+    } catch (e) {
+      console.warn("Saving settings to localStorage failed:", e);
+    }
+  }, [settings]);
 
   // Inject Theme Colors
   useEffect(() => {
@@ -275,7 +317,7 @@ const App: React.FC = () => {
     console.log("Connecting to socket...");
     
     // Automatically detect correct socket server URL
-    let serverUrl = import.meta.env.VITE_BACKEND_URL || '';
+    let serverUrl = settings.serverUrl || import.meta.env.VITE_BACKEND_URL || '';
     if (!serverUrl) {
       const origin = window.location.origin;
       // In Capacitor or local files, origin might be localhost, capacitor://, or file://
@@ -283,28 +325,36 @@ const App: React.FC = () => {
         // Fall back to the public deployment URL
         serverUrl = 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
       } else {
-        serverUrl = origin;
+         serverUrl = origin;
       }
     }
     
+    setDetectedSocketUrl(serverUrl);
     console.log("Socket server URL determined:", serverUrl);
     const newSocket = io(serverUrl);
     
     newSocket.on("connect", () => {
       console.log("Socket connected:", newSocket.id);
+      setSocketConnected(true);
       // Request initial data
       newSocket.emit("request_retroactive_list");
     });
 
+    newSocket.on("disconnect", () => {
+      setSocketConnected(false);
+    });
+
     newSocket.on("connect_error", (err) => {
       console.error("Socket connection error:", err);
+      setSocketConnected(false);
     });
 
     setSocket(newSocket);
     return () => {
       newSocket.close();
+      setSocketConnected(false);
     };
-  }, []);
+  }, [settings.serverUrl]);
 
   // Listen for retroactive check-ins (Always listen if socket exists)
   useEffect(() => {
@@ -335,9 +385,11 @@ const App: React.FC = () => {
           initP2P(myId);
           // Clean ID for sharing
           const p2pId = myId.replace(/[^a-zA-Z0-9]/g, '');
-          setSettings(prev => ({...prev, peerId: p2pId}));
+          if (settings.peerId !== p2pId) {
+              setSettings(prev => ({...prev, peerId: p2pId}));
+          }
       }
-  }, [settings.setupComplete, myId]);
+  }, [settings.setupComplete, myId, settings.peerId]);
 
 
   // Initialize Geolocation
@@ -807,6 +859,8 @@ const App: React.FC = () => {
             onUpdate={handleSettingsUpdate} 
             onClose={() => setCurrentScreen(AppScreen.MAP)} 
             onLogout={handleLogout}
+            socketConnected={socketConnected}
+            detectedSocketUrl={detectedSocketUrl}
         />
       )}
 

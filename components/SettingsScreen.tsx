@@ -8,6 +8,8 @@ interface SettingsScreenProps {
   onUpdate: (newSettings: Partial<UserSettings>) => void;
   onClose: () => void;
   onLogout: () => void;
+  socketConnected?: boolean;
+  detectedSocketUrl?: string;
 }
 
 const LANGUAGES = [
@@ -81,7 +83,16 @@ const TEXTS: Record<string, any> = {
     p2pDesc: "Share your ID or enter a friend's ID to connect directly.",
     myId: "My ID",
     connectTo: "Connect to ID",
-    connect: "Connect"
+    connect: "Connect",
+    connectionSettings: "Server Connection",
+    connectionDesc: "Configure the backend servers for real-time discovery of nearby users.",
+    serverUrlLabel: "Socket.IO Server URL",
+    serverStatusLabel: "Status",
+    statusConnected: "Connected",
+    statusDisconnected: "Disconnected / Connecting...",
+    statusRadarOff: "Radar Off (Invisible)",
+    restoreDefault: "Restore Dynamic Server",
+    saveConnection: "Save & Reconnect"
   },
   Italian: {
     title: "Impostazioni",
@@ -131,7 +142,16 @@ const TEXTS: Record<string, any> = {
     p2pDesc: "Condividi il tuo ID o inserisci quello di un amico per connetterti.",
     myId: "Mio ID",
     connectTo: "Connetti a ID",
-    connect: "Connetti"
+    connect: "Connetti",
+    connectionSettings: "Connessione Server",
+    connectionDesc: "Configura i server di backend per la scoperta in tempo reale degli utenti vicini.",
+    serverUrlLabel: "URL Server Socket.IO",
+    serverStatusLabel: "Stato",
+    statusConnected: "Connesso",
+    statusDisconnected: "Disconnesso / Connessione...",
+    statusRadarOff: "Radar Spento (Invisibile)",
+    restoreDefault: "Ripristina Server Dinamico",
+    saveConnection: "Salva e Riconnetti"
   },
   Spanish: {
     title: "Ajustes",
@@ -584,10 +604,11 @@ const TEXTS: Record<string, any> = {
     connect: "Подключить"
   }
 };
-export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpdate, onClose, onLogout }) => {
+export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpdate, onClose, onLogout, socketConnected, detectedSocketUrl }) => {
   const [nickname, setNickname] = useState(settings.nickname);
   const [connectId, setConnectId] = useState('');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [customServer, setCustomServer] = useState(settings.serverUrl || '');
   
   const t = TEXTS[settings.language] || TEXTS['English'];
 
@@ -659,6 +680,87 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpda
                             <span className="text-sm">{lang.label}</span>
                         </button>
                     ))}
+                </div>
+            </div>
+        </section>
+
+        {/* Server Connection Section */}
+        <section className="bg-white rounded-2xl shadow-sm p-4">
+            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">{t.connectionSettings || "Server Connection"}</h3>
+            <p className="text-xs text-gray-500 mb-3">{t.connectionDesc || "Configure the connection to the server for real-time match discovery."}</p>
+            
+            {/* Server Status Panel */}
+            <div className="mb-4 bg-gray-50 p-3 rounded-xl border border-gray-100 flex items-center justify-between">
+                <div>
+                     <span className="text-xs font-bold text-gray-400 uppercase">{t.serverStatusLabel || "Status"}</span>
+                     <div className="text-sm font-medium text-gray-700 flex items-center gap-2 mt-0.5">
+                         {settings.isOnline ? (
+                             socketConnected ? (
+                                 <>
+                                     <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                                     <span className="text-green-600 font-semibold text-xs">{t.statusConnected || "Connected"}</span>
+                                 </>
+                             ) : (
+                                 <>
+                                     <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                                     <span className="text-red-500 font-semibold text-xs">{t.statusDisconnected || "Disconnected"}</span>
+                                 </>
+                             )
+                         ) : (
+                             <>
+                                 <span className="w-2.5 h-2.5 rounded-full bg-gray-400"></span>
+                                 <span className="text-gray-500 text-xs">{t.statusRadarOff || "Radar Off (Invisible)"}</span>
+                             </>
+                         )}
+                     </div>
+                </div>
+                {detectedSocketUrl && (
+                    <div className="text-right">
+                         <span className="text-xs font-bold text-gray-400 uppercase">Server Attivo</span>
+                         <div className="text-[10px] font-mono text-gray-500 max-w-[180px] truncate" title={detectedSocketUrl}>
+                             {settings.serverUrl ? "Custom: " : "Default: "}
+                             {detectedSocketUrl}
+                         </div>
+                    </div>
+                )}
+            </div>
+
+            <div className="space-y-3">
+                <div>
+                    <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">{t.serverUrlLabel || "URL Server Socket.IO"}</label>
+                    <input 
+                        type="text" 
+                        value={customServer}
+                        onChange={(e) => setCustomServer(e.target.value)}
+                        placeholder={detectedSocketUrl || "e.g. https://my-server.com"}
+                        className="w-full p-2 border border-gray-200 rounded-lg text-xs font-mono text-gray-700 placeholder-gray-400 focus:ring-1 focus:ring-turquoise-500 outline-none"
+                    />
+                </div>
+                
+                <div className="flex gap-2">
+                    {settings.serverUrl && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setCustomServer('');
+                                onUpdate({ serverUrl: undefined });
+                                alert(settings.language === 'Italian' ? "Server ripristinato!" : "Server reset successfully!");
+                            }}
+                            className="flex-1 py-1.5 text-[10px] border border-gray-200 rounded-lg font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition"
+                        >
+                            {t.restoreDefault || "Ripristina Default"}
+                        </button>
+                    )}
+                    <button 
+                        type="button"
+                        onClick={() => {
+                            onUpdate({ serverUrl: customServer.trim() || undefined });
+                            alert(settings.language === 'Italian' ? "Server salvato! Riconnessione..." : "Server saved! Reconnecting...");
+                        }}
+                        className="flex-1 bg-turquoise-500 text-white py-1.5 rounded-lg font-bold text-xs hover:bg-turquoise-600 transition text-center shadow-sm"
+                    >
+                        {t.saveConnection || "Salva e Connetti"}
+                    </button>
                 </div>
             </div>
         </section>

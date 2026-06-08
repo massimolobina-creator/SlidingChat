@@ -8,6 +8,7 @@ export interface UserSettings {
   notificationsEnabled: boolean;
   blockedUsers: string[]; // Array of user IDs
   peerId?: string; // P2P ID
+  serverUrl?: string; // Custom/detected Socket.io Server URL
 }
 
 export interface Coordinates {
