@@ -376,6 +376,11 @@ const App: React.FC = () => {
       }
     }
     
+    // Strip trailing slash to avoid double slash problems during connection handshakes
+    if (serverUrl && serverUrl.endsWith('/')) {
+      serverUrl = serverUrl.slice(0, -1);
+    }
+
     setDetectedSocketUrl(serverUrl);
     console.log("Socket server URL determined:", serverUrl);
     
