@@ -7,7 +7,7 @@ import { UserListView } from './components/UserListView';
 import { ChatInterface } from './components/ChatInterface';
 import { SettingsScreen } from './components/SettingsScreen';
 import { UserSettings, Coordinates, NearbyUser, AppScreen, ViewMode, Message, RetroactiveCheckIn } from './types';
-import { initP2P, connectToPeer, onP2PMessage } from './services/p2pService';
+import { initP2P, connectToPeer, onP2PMessage, setSocketFallbackHandler, triggerIncomingMessage } from './services/p2pService';
 import { playSound } from './services/soundService';
 import { translateText, transcribeAudio, generateBotReply } from './services/geminiService';
 import { io, Socket } from 'socket.io-client';
@@ -331,8 +331,27 @@ const App: React.FC = () => {
     
     setDetectedSocketUrl(serverUrl);
     console.log("Socket server URL determined:", serverUrl);
-    const newSocket = io(serverUrl);
     
+    // Instantiate with robust cross-platform options to guarantee connection over mobile/carrier lines
+    const newSocket = io(serverUrl, {
+      transports: ['websocket', 'polling'],
+      autoConnect: true,
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000
+    });
+    
+    // Bridge our P2P message sender to route over Socket.io fallback instantly
+    setSocketFallbackHandler((recipientId, message) => {
+      newSocket.emit("send_message", { recipientId, message });
+    });
+
+    // Handle incoming bridged/proxied messages
+    newSocket.on("receive_message", (message: Message) => {
+      console.log("Proxied event received over Socket.io from server:", message);
+      triggerIncomingMessage(message);
+    });
+
     newSocket.on("connect", () => {
       console.log("Socket connected:", newSocket.id);
       setSocketConnected(true);
@@ -539,7 +558,15 @@ const App: React.FC = () => {
     };
 
     // 1. Send my data to the server
-    socket.emit("update_location", myData);
+    const sendLocationUpdate = () => {
+        console.log("Emitting location update to server:", myData.nickname);
+        socket.emit("update_location", myData);
+    };
+
+    sendLocationUpdate();
+
+    // Instantly refresh location payload upon any socket connection or reconnection event
+    socket.on("connect", sendLocationUpdate);
 
     // 2. Listen for user list updates
     const handleUsersUpdate = (allUsers: any[]) => {
@@ -565,6 +592,7 @@ const App: React.FC = () => {
     return () => {
         clearInterval(syncInterval);
         socket.off("users_update", handleUsersUpdate);
+        socket.off("connect", sendLocationUpdate);
     };
   }, [settings.setupComplete, settings.isOnline, location, settings.nickname, settings.language, myId, settings.peerId, socket]);
 

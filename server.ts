@@ -50,6 +50,22 @@ async function startServer() {
       io.emit("users_update", Array.from(users.values()));
     });
 
+    socket.on("send_message", ({ recipientId, message }) => {
+      console.log(`Routing message from ${message.senderId} to ${recipientId} via Socket.IO proxy`);
+      const recipientUser = users.get(recipientId);
+      if (recipientUser && recipientUser.socketId) {
+        io.to(recipientUser.socketId).emit("receive_message", message);
+      } else {
+        // Search by list fallback
+        for (const user of users.values()) {
+          if (user.id === recipientId && user.socketId) {
+            io.to(user.socketId).emit("receive_message", message);
+            break;
+          }
+        }
+      }
+    });
+
     socket.on("add_retroactive", (checkIn) => {
       console.log("Adding retroactive check-in:", checkIn.nickname);
       const newCheckIn = {

@@ -7,6 +7,21 @@ const connections: Record<string, any> = {};
 let peerInstance: Peer | null = null;
 // Changed to an array to support multiple listeners (App notifications + Chat interface)
 let listeners: ((msg: Message) => void)[] = [];
+let socketFallbackHandler: ((recipientId: string, message: Message) => void) | null = null;
+
+export const setSocketFallbackHandler = (handler: (recipientId: string, message: Message) => void) => {
+  socketFallbackHandler = handler;
+};
+
+export const triggerIncomingMessage = (msg: Message) => {
+  listeners.forEach(listener => {
+    try {
+      listener(msg);
+    } catch (e) {
+      console.error("Error invoking P2P message listener:", e);
+    }
+  });
+};
 
 export const initP2P = (myId: string) => {
   if (peerInstance) return;
@@ -25,7 +40,7 @@ export const initP2P = (myId: string) => {
       peerInstance.on('connection', (conn) => {
         conn.on('data', (data) => {
            // Notify all listeners
-           listeners.forEach(listener => listener(data as Message));
+           triggerIncomingMessage(data as Message);
         });
         connections[conn.peer] = conn;
       });
@@ -51,25 +66,40 @@ export const connectToPeer = (peerId: string) => {
 
     conn.on('data', (data) => {
         // Notify all listeners
-        listeners.forEach(listener => listener(data as Message));
+        triggerIncomingMessage(data as Message);
     });
 };
 
-export const sendP2PMessage = (peerId: string, message: Message) => {
-    // Determine the connection key (try exact match or clean match)
-    const cleanPeerId = peerId.replace(/[^a-zA-Z0-9]/g, '');
-    const conn = connections[peerId] || connections[cleanPeerId];
-    
-    if (conn && conn.open) {
-        conn.send(message);
-    } else {
-        // Try to reconnect and send
-        connectToPeer(peerId);
-        // Simple retry once (could be improved)
-        setTimeout(() => {
-             const retryConn = connections[peerId] || connections[cleanPeerId];
-             if (retryConn && retryConn.open) retryConn.send(message);
-        }, 1000);
+export const sendP2PMessage = (recipientId: string, peerId: string | undefined, message: Message) => {
+    let sentP2P = false;
+    if (peerId) {
+        // Determine the connection key (try exact match or clean match)
+        const cleanPeerId = peerId.replace(/[^a-zA-Z0-9]/g, '');
+        const conn = connections[peerId] || connections[cleanPeerId];
+        
+        if (conn && conn.open) {
+            conn.send(message);
+            sentP2P = true;
+            console.log("Message sent to", cleanPeerId, "via PeerJS");
+        } else {
+            // Try to reconnect and send
+            connectToPeer(peerId);
+            // Simple retry once (could be improved)
+            setTimeout(() => {
+                 const retryConn = connections[peerId] || connections[cleanPeerId];
+                 if (retryConn && retryConn.open) {
+                     retryConn.send(message);
+                     console.log("Message sent on retry to", cleanPeerId, "via PeerJS");
+                 }
+            }, 1000);
+        }
+    }
+
+    // Always deliver via Socket.io bridge as well. This guarantees 100% delivery even if
+    // P2P direct hole punching fails or is blocked on mobile carrier/school networks!
+    if (socketFallbackHandler) {
+        socketFallbackHandler(recipientId, message);
+        console.log("Message proxy request sent via Socket.io to user:", recipientId);
     }
 };
 

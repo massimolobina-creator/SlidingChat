@@ -179,7 +179,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 timestamp: Date.now(),
                 // We piggyback the info that the timer started
               };
-              if (recipient.peerId) sendP2PMessage(recipient.peerId, receipt);
+              sendP2PMessage(recipient.id, recipient.peerId, receipt);
             }, 100);
 
             return { ...msg, expiresAt: expiration, status: "read" };
@@ -316,7 +316,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 refId: finalMsg.id,
                 timestamp: Date.now(),
               };
-              if (recipient.peerId) sendP2PMessage(recipient.peerId, receipt);
+              sendP2PMessage(recipient.id, recipient.peerId, receipt);
             }, 200);
           }
 
@@ -383,10 +383,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     addMessage(localMsg);
 
     // 2. Create message for NETWORK (Sender is my Real ID)
-    if (recipient.peerId) {
-      const networkMsg = { ...localMsg, senderId: myId };
-      sendP2PMessage(recipient.peerId, networkMsg);
-    }
+    const networkMsg = { ...localMsg, senderId: myId };
+    sendP2PMessage(recipient.id, recipient.peerId, networkMsg);
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -414,10 +412,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
       addMessage(localMsg);
 
-      if (recipient.peerId) {
-        const networkMsg = { ...localMsg, senderId: myId };
-        sendP2PMessage(recipient.peerId, networkMsg);
-      }
+      const networkMsg = { ...localMsg, senderId: myId };
+      sendP2PMessage(recipient.id, recipient.peerId, networkMsg);
     };
     reader.readAsDataURL(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -490,10 +486,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
           addMessage(localMsg);
 
-          if (recipient.peerId) {
-            const networkMsg = { ...localMsg, senderId: myId };
-            sendP2PMessage(recipient.peerId, networkMsg);
-          }
+          const networkMsg = { ...localMsg, senderId: myId };
+          sendP2PMessage(recipient.id, recipient.peerId, networkMsg);
         };
       };
 
