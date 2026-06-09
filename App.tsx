@@ -383,8 +383,8 @@ const App: React.FC = () => {
     // Specifying purely the 'websocket' transport completely bypasses polling, creating a direct
     // persistent TCP socket connection which is 100% stable on Cloud Run and mobile carrier NATs!
     const newSocket = io(serverUrl, {
-      transports: ['polling', 'websocket'],
-      upgrade: true,
+      transports: ['websocket'],
+      upgrade: false,
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: Infinity,
