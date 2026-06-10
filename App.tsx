@@ -383,12 +383,10 @@ const App: React.FC = () => {
     console.log("Socket server URL determined:", serverUrl);
     
     // Instantiate with robust cross-platform options to guarantee connection over mobile/carrier lines.
-    // By allowing both 'polling' and 'websocket', the app will successfully establish a standard HTTP
-    // long-polling connection if raw network sockets are blocked by the carrier NAT or dev proxy,
-    // and automatically upgrade to highly performance-optimal WebSockets if they are available.
+    // By placing 'websocket' FIRST, we force Socket.io to establish a raw binary connection immediately,
+    // which completely avoids the HTTP long-polling load balancer mismatch issues on serverless Cloud Run.
     const newSocket = io(serverUrl, {
-      transports: ['polling', 'websocket'],
-      upgrade: true,
+      transports: ['websocket'],
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: Infinity,

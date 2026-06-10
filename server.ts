@@ -30,9 +30,14 @@ async function startServer() {
   const httpServer = createServer(app);
   const io = new Server(httpServer, {
     cors: {
-      origin: "*",
-      methods: ["GET", "POST"]
-    }
+      origin: (origin, callback) => {
+        // Allow any requesting origin (including local schemes like capacitor:// and http://localhost)
+        callback(null, true);
+      },
+      methods: ["GET", "POST"],
+      credentials: true
+    },
+    allowEIO3: true
   });
 
   const PORT = 3000;
