@@ -341,31 +341,36 @@ const App: React.FC = () => {
     
     // Connect to current origin's socket backend if it's a real web deployment (dev, prod/pre),
     // and fallback to PRE server only for local mock file schemas or native Capacitor apps
-    let serverUrl = settings.serverUrl || import.meta.env.VITE_BACKEND_URL || '';
-    if (!serverUrl) {
-      if (typeof window !== 'undefined') {
-        const origin = window.location.origin || '';
-        const protocol = window.location.protocol || '';
+    let serverUrl = settings.serverUrl || '';
+    if (typeof window !== 'undefined') {
+      const origin = window.location.origin || '';
+      const protocol = window.location.protocol || '';
 
-        // Differentiate standard web browsers from compiled native apps (Capacitor/Cordova)
-        const isNative = !!(window as any).Capacitor || 
-                         window.hasOwnProperty('Capacitor') || 
-                         navigator.userAgent.includes('Capacitor') ||
-                         protocol.startsWith('file') || 
-                         protocol.startsWith('capacitor') || 
-                         protocol.startsWith('ionic');
+      // Differentiate standard web browsers from compiled native apps (Capacitor/Cordova)
+      const isNative = !!(window as any).Capacitor || 
+                       window.hasOwnProperty('Capacitor') || 
+                       navigator.userAgent.includes('Capacitor') ||
+                       protocol.startsWith('file') || 
+                       protocol.startsWith('capacitor') || 
+                       protocol.startsWith('ionic');
 
-        if (origin && origin.startsWith('http') && !isNative) {
-          // Desktop and mobile web browsers (local server, Dev App, or Shared App Deployment)
+      if (origin && origin.startsWith('http') && !isNative) {
+        // Desktop and mobile web browsers (local server, Dev App, or Shared App Deployment)
+        // If they have a custom server, use it unless it points to any platform cloudrun URL, in which case we prefer the current origin
+        if (!serverUrl || serverUrl.includes('run.app')) {
           serverUrl = origin;
           console.log("Auto-detected web connection (using page origin):", serverUrl);
-        } else {
-          // Compiled native mobile apps must connect to the centralized production/shared server relay
-          serverUrl = 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
-          console.log("Auto-detected native framework runtime, using cloud relay fallback:", serverUrl);
         }
       } else {
-        serverUrl = 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
+        // Compiled native mobile apps must connect to the centralized production/shared server relay
+        if (!serverUrl) {
+          serverUrl = import.meta.env.VITE_BACKEND_URL || 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
+          console.log("Auto-detected native framework runtime, using cloud relay fallback:", serverUrl);
+        }
+      }
+    } else {
+      if (!serverUrl) {
+        serverUrl = import.meta.env.VITE_BACKEND_URL || 'https://ais-pre-k5bidgl56ur536euruihgy-578586033231.europe-west2.run.app';
       }
     }
     
