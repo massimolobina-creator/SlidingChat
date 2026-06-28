@@ -7,8 +7,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Cross-runtime compatible path resolution (ESM during dev, CJS during production bundle)
+const resolvedFilename = typeof import.meta !== "undefined" && import.meta.url ? fileURLToPath(import.meta.url) : "";
+const resolvedDirname = resolvedFilename ? path.dirname(resolvedFilename) : process.cwd();
 
 async function startServer() {
   const app = express();
@@ -31,7 +32,7 @@ async function startServer() {
   const io = new Server(httpServer, {
     cors: {
       origin: (origin, callback) => {
-        // Allow any requesting origin (including local schemes like capacitor:// and http://localhost)
+        // Allow any requesting origin dynamically (important for local development, web preview, and Capacitor apps)
         callback(null, true);
       },
       methods: ["GET", "POST"],
@@ -187,12 +188,47 @@ async function startServer() {
       server: { middlewareMode: true },
       appType: "spa",
     });
+    // Explicitly prevent browser caching of ALL assets during development to avoid stale files
+    app.use((req, res, next) => {
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+      next();
+    });
     app.use(vite.middlewares);
   } else {
-    // Serve static files in production
+    // Serve static files in production with strict cache-control headers
     const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+    
+    // Explicitly serve index.html with Cache-Control no-store
+    app.get("/", (req, res) => {
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+
+    // Serve other static assets with immutable caching since they have unique hash names, except html files
+    app.use(express.static(distPath, {
+      etag: true,
+      lastModified: true,
+      setHeaders: (res, filepath) => {
+        if (filepath.endsWith(".html")) {
+          res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+          res.setHeader("Pragma", "no-cache");
+          res.setHeader("Expires", "0");
+        } else {
+          // JS, CSS, images, manifest, and logos can be cached but let's make sure they are updated if needed
+          res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        }
+      }
+    }));
+    
+    // Fallback route for SPA should also have no-store cache headers
+    app.get("*all", (req, res) => {
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
       res.sendFile(path.join(distPath, "index.html"));
     });
   }

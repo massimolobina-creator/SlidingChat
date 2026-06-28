@@ -382,17 +382,18 @@ const App: React.FC = () => {
     setDetectedSocketUrl(serverUrl);
     console.log("Socket server URL determined:", serverUrl);
     
-    // Instantiate with robust cross-platform options to guarantee connection over mobile/carrier lines.
-    // By placing 'websocket' FIRST, we force Socket.io to establish a raw binary connection immediately,
-    // which completely avoids the HTTP long-polling load balancer mismatch issues on serverless Cloud Run.
-    const newSocket = io(serverUrl, {
-      transports: ['polling', 'websocket'],
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      timeout: 20000
-    });
+     // Instantiate with robust cross-platform options to guarantee connection over mobile/carrier lines.
+     // We allow both 'polling' and 'websocket' transports with withCredentials to ensure that
+     // even behind strict iframe sandbox restrictions or enterprise proxies, a connection is established.
+     const newSocket = io(serverUrl, {
+       transports: ['polling', 'websocket'],
+       withCredentials: true,
+       autoConnect: true,
+       reconnection: true,
+       reconnectionAttempts: Infinity,
+       reconnectionDelay: 1000,
+       timeout: 20000
+     });
     
     // Bridge our P2P message sender to route over Socket.io fallback instantly
     setSocketFallbackHandler((recipientId, message) => {

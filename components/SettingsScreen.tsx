@@ -639,7 +639,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpda
     <div className="absolute inset-0 z-[1550] bg-gray-100 flex flex-col animate-slideUp">
       {/* Header */}
       <div className="bg-white px-4 py-4 shadow-sm flex items-center justify-between sticky top-0 z-10">
-        <h2 className="text-xl font-bold text-gray-800">{t.title}</h2>
+        <div className="flex items-center gap-2.5">
+          <img 
+            src="/logo.png?v=1.0.1" 
+            alt="SlidingChat" 
+            className="w-8 h-8 rounded-xl border border-gray-100 shadow-sm"
+            referrerPolicy="no-referrer"
+          />
+          <h2 className="text-xl font-bold text-gray-800">{t.title}</h2>
+        </div>
         <button 
           onClick={onClose}
           className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full transition"

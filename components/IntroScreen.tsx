@@ -219,16 +219,13 @@ export const IntroScreen: React.FC<IntroScreenProps> = ({ onComplete }) => {
         
         {/* Logo Section */}
         <div className="flex flex-col items-center mb-8">
-            <div className="relative w-32 h-24 mb-2 flex items-center justify-center">
-                {/* Bubble 1 (Back/Left) */}
-                <div className="absolute left-2 top-2 w-20 h-16 bg-turquoise-500 rounded-2xl rounded-bl-none transform -rotate-6 opacity-90 shadow-md"></div>
-                {/* Bubble 2 (Front/Right) */}
-                <div className="absolute right-2 bottom-4 w-20 h-16 bg-blue-600 rounded-2xl rounded-tr-none transform rotate-3 shadow-lg opacity-95"></div>
-                
-                {/* Text Overlay */}
-                <div className="absolute inset-0 z-10 flex items-center justify-center pt-1 pr-1">
-                    <span className="text-white font-bold text-3xl tracking-tight drop-shadow-md font-sans lowercase">sliding</span>
-                </div>
+            <div className="w-24 h-24 mb-3 flex items-center justify-center bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+                <img 
+                    src="/logo.png" 
+                    alt="SlidingChat Logo" 
+                    className="w-full h-full object-cover p-1 rounded-3xl"
+                    referrerPolicy="no-referrer"
+                />
             </div>
             <h1 className="text-2xl font-bold text-gray-800">{t.title}</h1>
             <p className="text-gray-500 text-sm">{t.subtitle}</p>
