@@ -221,7 +221,7 @@ export const IntroScreen: React.FC<IntroScreenProps> = ({ onComplete }) => {
         <div className="flex flex-col items-center mb-8">
             <div className="w-24 h-24 mb-3 flex items-center justify-center bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
                 <img 
-                    src="/logo.png" 
+                    src="logo.png" 
                     alt="SlidingChat Logo" 
                     className="w-full h-full object-cover p-1 rounded-3xl"
                     referrerPolicy="no-referrer"

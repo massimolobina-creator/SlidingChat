@@ -383,11 +383,11 @@ const App: React.FC = () => {
     console.log("Socket server URL determined:", serverUrl);
     
      // Instantiate with robust cross-platform options to guarantee connection over mobile/carrier lines.
-     // We allow both 'polling' and 'websocket' transports with withCredentials to ensure that
-     // even behind strict iframe sandbox restrictions or enterprise proxies, a connection is established.
+     // By placing 'websocket' ONLY, we force Socket.io to establish a raw binary connection immediately,
+     // which completely avoids the HTTP long-polling load balancer mismatch issues on serverless Cloud Run.
      const newSocket = io(serverUrl, {
-       transports: ['polling', 'websocket'],
-       withCredentials: true,
+       transports: ['websocket'],
+       upgrade: false,
        autoConnect: true,
        reconnection: true,
        reconnectionAttempts: Infinity,
