@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { UserSettings } from '../types';
 import { connectToPeer } from '../services/p2pService';
+const logoImg = '/logo.png';
 
 interface SettingsScreenProps {
   settings: UserSettings;
@@ -641,7 +642,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ settings, onUpda
       <div className="bg-white px-4 py-4 shadow-sm flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-2.5">
           <img 
-            src="logo.png?v=1.0.1" 
+            src={logoImg} 
             alt="SlidingChat" 
             className="w-8 h-8 rounded-xl border border-gray-100 shadow-sm"
             referrerPolicy="no-referrer"

@@ -1,8 +1,10 @@
 
 import React, { useState } from 'react';
 import { UserSettings } from '../types';
+const logoImg = '/logo.png';
 
 interface IntroScreenProps {
+  initialSettings: UserSettings;
   onComplete: (settings: Partial<UserSettings>) => void;
 }
 
@@ -188,13 +190,13 @@ const TEXTS: Record<string, any> = {
   }
 };
 
-export const IntroScreen: React.FC<IntroScreenProps> = ({ onComplete }) => {
+export const IntroScreen: React.FC<IntroScreenProps> = ({ initialSettings, onComplete }) => {
   const [step, setStep] = useState(1);
-  const [language, setLanguage] = useState('English');
+  const [language, setLanguage] = useState(initialSettings.language || 'English');
   const [ageChecked, setAgeChecked] = useState(false);
   const [privacyUS, setPrivacyUS] = useState(false);
   const [privacyEU, setPrivacyEU] = useState(false);
-  const [nickname, setNickname] = useState('');
+  const [nickname, setNickname] = useState(initialSettings.nickname || '');
 
   const t = TEXTS[language] || TEXTS['English'];
 
@@ -221,7 +223,7 @@ export const IntroScreen: React.FC<IntroScreenProps> = ({ onComplete }) => {
         <div className="flex flex-col items-center mb-8">
             <div className="w-24 h-24 mb-3 flex items-center justify-center bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
                 <img 
-                    src="logo.png" 
+                    src={logoImg} 
                     alt="SlidingChat Logo" 
                     className="w-full h-full object-cover p-1 rounded-3xl"
                     referrerPolicy="no-referrer"
