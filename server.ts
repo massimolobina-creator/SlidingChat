@@ -213,12 +213,23 @@ async function startServer() {
       etag: true,
       lastModified: true,
       setHeaders: (res, filepath) => {
+        const basename = path.basename(filepath);
         if (filepath.endsWith(".html")) {
           res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
           res.setHeader("Pragma", "no-cache");
           res.setHeader("Expires", "0");
+        } else if (
+          basename === "logo.png" || 
+          basename === "favicon.png" || 
+          basename === "icon-192.png" || 
+          basename === "icon-512.png" || 
+          basename === "manifest.json"
+        ) {
+          res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+          res.setHeader("Pragma", "no-cache");
+          res.setHeader("Expires", "0");
         } else {
-          // JS, CSS, images, manifest, and logos can be cached but let's make sure they are updated if needed
+          // JS, CSS, and other assets with unique hash names can be cached immutably
           res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
         }
       }

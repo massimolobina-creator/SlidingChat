@@ -370,8 +370,8 @@ const App: React.FC = () => {
      // By placing 'websocket' ONLY, we force Socket.io to establish a raw binary connection immediately,
      // which completely avoids the HTTP long-polling load balancer mismatch issues on serverless Cloud Run.
      const newSocket = io(serverUrl, {
-       transports: ['websocket'],
-       upgrade: false,
+       transports: ['polling', 'websocket'],
+       upgrade: true,
        autoConnect: true,
        reconnection: true,
        reconnectionAttempts: Infinity,

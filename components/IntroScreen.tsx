@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { UserSettings } from '../types';
-const logoImg = '/logo.png';
+const logoImg = '/logo.png?v=2';
 
 interface IntroScreenProps {
   initialSettings: UserSettings;
