@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { UserSettings } from '../types';
 import { connectToPeer } from '../services/p2pService';
-const logoImg = '/logo.png?v=2';
+const logoImg = '/logo.png?v=3';
 
 interface SettingsScreenProps {
   settings: UserSettings;
