@@ -27,6 +27,18 @@ jobs:
       - name: Installa le dipendenze
         run: npm install
 
+      - name: Ripristina icone e logo originali per Web e Android
+        run: |
+          cp src/assets/images/logo_1783246563222.jpg public/logo.png
+          cp src/assets/images/logo_1783246563222.jpg public/favicon.png
+          cp src/assets/images/logo_1783246563222.jpg public/icon-192.png
+          cp src/assets/images/logo_1783246563222.jpg public/icon-512.png
+          cp src/assets/images/logo_1783246563222.jpg assets/logo.png
+          cp src/assets/images/logo_1783246563222.jpg assets/icon.png
+          cp src/assets/images/logo_1783246563222.jpg assets/icon-only.png
+          cp src/assets/images/logo_1783246563222.jpg assets/icon-foreground.png
+          cp src/assets/images/logo_1783246563222.jpg assets/icon-background.png
+
       - name: Genera build del sito web (Vite)
         run: npm run build
 
@@ -34,6 +46,14 @@ jobs:
         run: |
           npx cap add android || true
           npx cap sync android
+          for dir in android/app/src/main/res/mipmap-*dpi; do
+            if [ -d "$dir" ]; then
+              cp src/assets/images/logo_1783246563222.jpg "$dir/ic_launcher.png"
+              cp src/assets/images/logo_1783246563222.jpg "$dir/ic_launcher_round.png"
+              cp src/assets/images/logo_1783246563222.jpg "$dir/ic_launcher_foreground.png"
+            fi
+          done
+          cp src/assets/images/logo_1783246563222.jpg android/app/src/main/res/drawable/splash.png || true
 
       - name: Compila APK (Gradle)
         run: |

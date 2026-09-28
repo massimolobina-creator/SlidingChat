@@ -13,6 +13,7 @@ import { translateText, transcribeAudio, generateBotReply } from './services/gem
 import { io, Socket } from 'socket.io-client';
 import { RetroactiveMenu } from './components/RetroactiveMenu';
 import { AdBanner } from './components/AdBanner';
+import { Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
 
 // Color definitions for themes
@@ -229,9 +230,7 @@ const App: React.FC = () => {
       // Check if we are physically running in a standard desktop web browser or in a native hybrid/mobile wrapper
       const isMobileDevice = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       const isWeb = typeof window !== 'undefined' && 
-                    !window.hasOwnProperty('Capacitor') && 
-                    !(window as any).Capacitor &&
-                    !navigator.userAgent.includes('Capacitor') &&
+                    !Capacitor.isNativePlatform() &&
                     !isMobileDevice &&
                     window.location.protocol.startsWith('http');
 
@@ -337,9 +336,7 @@ const App: React.FC = () => {
         const protocol = window.location.protocol || '';
 
         // Differentiate standard web browsers from compiled native apps (Capacitor/Cordova)
-        const isNative = !!(window as any).Capacitor || 
-                         window.hasOwnProperty('Capacitor') || 
-                         navigator.userAgent.includes('Capacitor') ||
+        const isNative = Capacitor.isNativePlatform() ||
                          protocol.startsWith('file') || 
                          protocol.startsWith('capacitor') || 
                          protocol.startsWith('ionic');
@@ -367,11 +364,9 @@ const App: React.FC = () => {
     console.log("Socket server URL determined:", serverUrl);
     
      // Instantiate with robust cross-platform options to guarantee connection over mobile/carrier lines.
-     // By placing 'websocket' ONLY, we force Socket.io to establish a raw binary connection immediately,
-     // which completely avoids the HTTP long-polling load balancer mismatch issues on serverless Cloud Run.
      const newSocket = io(serverUrl, {
-       transports: ['websocket'],
-       upgrade: false,
+       transports: ['websocket', 'polling'],
+       upgrade: true,
        autoConnect: true,
        reconnection: true,
        reconnectionAttempts: Infinity,
