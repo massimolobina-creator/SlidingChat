@@ -13,20 +13,6 @@ const resolvedDirname = resolvedFilename ? path.dirname(resolvedFilename) : proc
 
 async function startServer() {
   const app = express();
-  
-  // Clear any existing debug log at start
-  try {
-    fs.writeFileSync(path.join(process.cwd(), "server.log"), `--- Server Started at ${new Date().toISOString()} ---\n`);
-  } catch (err) {}
-
-  // Logging middleware to trace all HTTP requests
-  app.use((req, res, next) => {
-    try {
-      const logMsg = `[HTTP FETCH] ${new Date().toISOString()} - ${req.method} ${req.url} - IP: ${req.ip} - User-Agent: ${req.headers["user-agent"]}\n`;
-      fs.appendFileSync(path.join(process.cwd(), "server.log"), logMsg);
-    } catch (err) {}
-    next();
-  });
 
   const httpServer = createServer(app);
   const io = new Server(httpServer, {
@@ -50,10 +36,6 @@ async function startServer() {
 
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
-    try {
-      const logLine = `[SOCKET CONNECT] ${new Date().toISOString()} - ID: ${socket.id} - Transport: ${socket.conn.transport.name} - Headers: ${JSON.stringify(socket.handshake.headers)}\n`;
-      fs.appendFileSync(path.join(process.cwd(), "server.log"), logLine);
-    } catch (err) {}
 
     // Send existing retroactive check-ins to the new user
     socket.emit("retroactive_list", retroactiveCheckIns);
@@ -180,6 +162,49 @@ async function startServer() {
   // API routes
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
+  });
+
+  // Cache generated PNG buffers in memory so public/ stays free of generated binaries that could block GitHub export
+  const pngIconCache = new Map<number, Buffer>();
+
+  // Serve logo and icons dynamically as true PNGs generated from src/assets/images/logo_1783246563222.jpg
+  app.get(["/logo.png", "/favicon.png", "/icon-192.png", "/icon-512.png"], async (req, res) => {
+    const filename = path.basename(req.path);
+    const publicPngPath = path.join(process.cwd(), "public", filename);
+    const assetJpgPath = path.join(process.cwd(), "src", "assets", "images", "logo_1783246563222.jpg");
+
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    if (fs.existsSync(publicPngPath)) {
+      res.setHeader("Content-Type", "image/png");
+      res.sendFile(publicPngPath);
+      return;
+    }
+
+    if (fs.existsSync(assetJpgPath)) {
+      const targetSize = filename === "favicon.png" || filename === "icon-192.png" ? 192 : 512;
+      try {
+        if (!pngIconCache.has(targetSize)) {
+          const sharpMod = (await import("sharp")).default;
+          const buf = await sharpMod(assetJpgPath)
+            .resize(targetSize, targetSize, {
+              fit: "contain",
+              background: { r: 255, g: 255, b: 255, alpha: 1 },
+            })
+            .png()
+            .toBuffer();
+          pngIconCache.set(targetSize, buf);
+        }
+        res.setHeader("Content-Type", "image/png");
+        res.send(pngIconCache.get(targetSize));
+        return;
+      } catch (e) {
+        res.setHeader("Content-Type", "image/jpeg");
+        res.sendFile(assetJpgPath);
+        return;
+      }
+    }
+
+    res.status(404).end();
   });
 
   // Vite middleware for development

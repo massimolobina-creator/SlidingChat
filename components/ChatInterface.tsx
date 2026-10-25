@@ -3,6 +3,7 @@ import { NearbyUser, Message, UserSettings } from "../types";
 import { transcribeAudio, translateText } from "../services/geminiService";
 import { sendP2PMessage, onP2PMessage } from "../services/p2pService";
 import { playSound } from "../services/soundService";
+import logoImg from '../src/assets/images/logo_1783246563222.jpg';
 
 interface ChatInterfaceProps {
   myId: string;
@@ -559,7 +560,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           <img
             src={recipient.avatar}
             alt={recipient.nickname}
-            className="w-10 h-10 rounded-full bg-gray-300 border border-white"
+            className="w-10 h-10 rounded-full bg-gray-300 border border-white object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = logoImg;
+            }}
           />
           <div
             className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-turquoise-600 rounded-full ${recipient.status === "online" ? "bg-green-400" : "bg-gray-400"}`}
@@ -576,6 +580,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 ? ct.reportedEncounter
                 : ct.p2pEncrypted}
           </p>
+        </div>
+
+        {/* SlidingChat Logo Badge */}
+        <div className="flex items-center gap-1.5 opacity-90 mr-1 bg-turquoise-700/60 px-2 py-1 rounded-xl border border-turquoise-500/40 shadow-inner">
+          <img 
+            src={logoImg} 
+            alt="SlidingChat" 
+            className="w-5 h-5 rounded-md object-cover border border-white/50" 
+          />
+          <span className="text-[11px] font-bold text-white tracking-wide hidden xs:inline">SlidingChat</span>
         </div>
 
         {/* Clear Chat Button */}
@@ -666,6 +680,25 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             'url("https://www.transparenttextures.com/patterns/cubes.png")',
         }}
       >
+        {messages.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center text-center p-6 my-auto select-none">
+            <div className="w-20 h-20 rounded-3xl bg-white shadow-xl p-1.5 border border-turquoise-100 mb-3 flex items-center justify-center overflow-hidden transform hover:scale-105 transition-transform">
+              <img src={logoImg} alt="SlidingChat" className="w-full h-full object-cover rounded-2xl" />
+            </div>
+            <h4 className="font-bold text-gray-800 text-lg">{recipient.nickname}</h4>
+            <div className="flex items-center gap-1.5 mt-1.5 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full border border-turquoise-200 shadow-sm">
+              <div className="w-2 h-2 rounded-full bg-turquoise-500 animate-pulse"></div>
+              <span className="text-xs text-turquoise-700 font-semibold">
+                {recipient.isRetroactive ? ct.reportedEncounter : ct.p2pEncrypted}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 mt-3 max-w-xs leading-relaxed">
+              {userSettings.language === 'Italian'
+                ? 'Invia un messaggio di testo, una foto o un audio per chattare in tempo reale.'
+                : 'Send a text, photo, or voice message to chat in real-time.'}
+            </p>
+          </div>
+        )}
         {messages.map((msg) => {
           // STRICT Check: It is ME if senderId is 'me' OR if senderId matches my ID
           const isMe = msg.senderId === "me" || msg.senderId === myId;
